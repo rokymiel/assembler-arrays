@@ -3,9 +3,9 @@ entry start
 
 include 'win32a.inc'
 
-; Êóçíåöîâ Ìèõàèë Àëåêñíäðîâè÷ ÁÏÈ199
-; 13 âàðèàíò
-; Ìàññèâ èç ýëåìåíòîâ íå ðàâíûõ ìèíèìóìó
+; Кузнецов Михаил Алексндрович БПИ199
+; 13 вариант
+; Массив из элементов не равных минимуму
 ;--------------------------------------------------------------------------
 section '.data' data readable writable
 
@@ -30,45 +30,45 @@ section '.data' data readable writable
 ;--------------------------------------------------------------------------
 section '.code' code readable executable
 start:
-; 1) Ââîä ìàññèâà À
+; 1) Ввод массива А
         call VectorInput
-; 2) Ïîèñê ìèíèìàëüíîãî ýëåìåíòà
+; 2) Поиск минимального элемента
         call VectorMin
-; 3) Çàïîëíåíèå ìàññèâà B
+; 3) Заполнение массива B
         call VectorBGenerator
-; 4) Âûâîä íîâîãî ìàññèâà
+; 4) Вывод нового массива
         push strNewVector
         call[printf]
         call VectorOut
-finish:                         ; Çàâåðøåíèåðàáîòû ïðîãðàììû
+finish:                         ; Завершениеработы программы
         call [getch]
         push 0
         call [ExitProcess]
 
-;-------------------------------Ââîä ìàññèâà è åãî äëèíû-------------------------
+;-------------------------------Ввод массива и его длины-------------------------
 VectorInput:
         push strVecSize
         call [printf]
         add esp, 4
 
         push vec_size
-        push strScanInt         ; ñ÷èòûâàíèå äëèíû ìàññèâà À
+        push strScanInt         ; считывание длины массива А
         call [scanf]
         add esp, 8
 
         mov eax, [vec_size]
-        cmp eax,[max_vec_size]  ; ïðîâåðêà, ÷òî ââåäåííàÿ äëèíà áîëüøå 0 è ìåíüøå èëè ðàâíà 100
+        cmp eax,[max_vec_size]  ; проверка, что введенная длина больше 0 и меньше или равна 100
         jg failSize
         cmp eax, 0
         jg  getVector
 ; fail size
-failSize:                       ; Âûâîä ñîîáùåíèÿ î íåêîððåêòíîé äëèíå
+failSize:                       ; Вывод сообщения о некорректной длине
         push [vec_size]
         push strIncorSize
         call [printf]
         jmp finish
 ; else continue...
-getVector:                      ; Ââîä ýëåìåíòîâ ìàññèâà
+getVector:                      ; Ввод элементов массива
         xor ecx, ecx            ; ecx = 0
         mov ebx, vec            ; ebx = &vec
 getVecLoop:
@@ -78,12 +78,12 @@ getVecLoop:
 
         mov [i], ecx
         push ecx
-        push strVecElemI        ; Îòîáðàæåíèå ñîîáùåíèÿ
+        push strVecElemI        ; Отображение сообщения
         call [printf]
         add esp, 8
 
         push ebx
-        push strScanInt         ; Ñ÷èòûâàíèå ââåäåííîãî ýëåìåíòà
+        push strScanInt         ; Считывание введенного элемента
         call [scanf]
         add esp, 8
 
@@ -94,7 +94,7 @@ getVecLoop:
         jmp getVecLoop
 endInputVector:
         ret
-;------------------------------ Ïîèñê ìèíèìàëüíîãî ýëåìåíòà------------------
+;------------------------------ Поиск минимального элемента------------------
 VectorMin:
 
         xor ecx, ecx            ; ecx = 0
@@ -105,8 +105,8 @@ minVecLoop:
         je endMinVector      ; to end of loop
 
         cmp ebp,[ebx]
-        jle nextMinVecLoop      ; Åñëè ýëåìåíò íå ìåíüøå ìèíèìóìà òî ïåðåõîäèì
-        mov ebp,[ebx]           ; ñîõðàíåíèå íîâîãî ìèíèìàëüíîãî ýëåìåíòà
+        jle nextMinVecLoop      ; Если элемент не меньше минимума то переходим
+        mov ebp,[ebx]           ; сохранение нового минимального элемента
         mov [min], ebp
 
 nextMinVecLoop:
@@ -115,7 +115,7 @@ nextMinVecLoop:
         jmp minVecLoop
 endMinVector:
         ret
-;------------------------------Ñîçäàíèå íîâîãî ìàññèâ-----------------------
+;------------------------------Создание нового массив-----------------------
 VectorBGenerator:
         mov [tmpStack], esp
         xor ecx, ecx            ; ecx = 0
@@ -126,10 +126,10 @@ newVecLoop:
         je endNewSumVector      ; to end of loop
         mov eax,[min]
         cmp eax,[ebx]
-        je nextNewVecLoop       ; Ïðîïóñê ýëåìåíòîâ ðàâíûõ ìèíèìàëüíîìó
+        je nextNewVecLoop       ; Пропуск элементов равных минимальному
 
         inc [new_vec_size]
-        mov ebp, [ebx]          ; Äîáàâëåíèå ýëåìåíòà â íîâûé ìàññèâ
+        mov ebp, [ebx]          ; Добавление элемента в новый массив
         mov [edx], ebp
         add edx,4
 
@@ -140,14 +140,14 @@ nextNewVecLoop:
 endNewSumVector:
         mov esp, [tmpStack]
         ret
-;------------------------------Âûâîä íîâîãî ìàññèâà---------------------------
+;------------------------------Вывод нового массива---------------------------
 VectorOut:
         mov [tmpStack], esp
         xor ecx, ecx            ; ecx = 0
         mov ebx, new_vec        ; ebx = &new_vec
 
-        cmp [new_vec_size],0    ; Ïðîâåðêà äëèíû íîâîãî ìàññèâà
-        je zeroElements         ; Åñëè äëèíà ðàâíà 0 çíà÷èò â ìàññèâå íåò ýëåìåíòîâ è îòîáðàæàåòñÿ ñîîòâåòñòâóþùåå ñîîáùåíèå
+        cmp [new_vec_size],0    ; Проверка длины нового массива
+        je zeroElements         ; Если длина равна 0 значит в массиве нет элементов и отображается соответствующее сообщение
 putVecLoop:
         mov [tmp], ebx
         cmp ecx, [new_vec_size]
@@ -165,7 +165,7 @@ putVecLoop:
         mov ebx, [tmp]
         add ebx, 4
         jmp putVecLoop
-zeroElements:                   ; Îòîáðàæåíèå ñîîáùåíèÿ î ïóñòîì ìàññèâå Â
+zeroElements:                   ; Отображение сообщения о пустом массиве В
         push strZeroNewVector
         call [printf]
 endOutputVector:
