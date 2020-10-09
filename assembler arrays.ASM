@@ -40,7 +40,7 @@ start:
         push strNewVector
         call[printf]
         call VectorOut
-finish:                         ; Завершениеработы программы
+finish:                         ; Завершение работы программы
         call [getch]
         push 0
         call [ExitProcess]
