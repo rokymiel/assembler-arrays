@@ -105,7 +105,7 @@ minVecLoop:
         cmp ecx, [vec_size]
         je endMinVector      ; to end of loop
         cmp ebp,[ebx]
-        jbe nextMinVecLoop  ; element not min skippimg
+        jle nextMinVecLoop  ; element not min skippimg
         mov ebp,[ebx]      ; save new min element
         mov [min], ebp
 nextMinVecLoop:
