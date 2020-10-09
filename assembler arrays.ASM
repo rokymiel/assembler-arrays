@@ -3,10 +3,13 @@ entry start
 
 include 'win32a.inc'
 
+; Êóçíåöîâ Ìèõàèë Àëåêñíäðîâè÷ ÁÏÈ199
+; 13 âàðèàíò
+; Ìàññèâ èç ýëåìåíòîâ íå ðàâíûõ ìèíèìóìó
 ;--------------------------------------------------------------------------
 section '.data' data readable writable
 
-        strVecSize   db 'size of vector? ', 0
+        strVecSize   db 'Enter size of vector A: ', 0
         strIncorSize db 'Incorrect size of vector = %d', 10, 0
         strVecElemI  db '[%d]? ', 0
         strScanInt   db '%d', 0
@@ -27,62 +30,60 @@ section '.data' data readable writable
 ;--------------------------------------------------------------------------
 section '.code' code readable executable
 start:
-; 1) vector input
+; 1) Ââîä ìàññèâà À
         call VectorInput
-; 2) get vector mi
+; 2) Ïîèñê ìèíèìàëüíîãî ýëåìåíòà
         call VectorMin
-; 3) get vector mi
+; 3) Çàïîëíåíèå ìàññèâà B
         call VectorBGenerator
-; 4) test vector out
-       push strNewVector
-       call[printf]
+; 4) Âûâîä íîâîãî ìàññèâà
+        push strNewVector
+        call[printf]
         call VectorOut
-finish:
+finish:                         ; Çàâåðøåíèåðàáîòû ïðîãðàììû
         call [getch]
-
         push 0
         call [ExitProcess]
 
-;--------------------------------------------------------------------------
+;-------------------------------Ââîä ìàññèâà è åãî äëèíû-------------------------
 VectorInput:
         push strVecSize
         call [printf]
         add esp, 4
 
         push vec_size
-        push strScanInt
+        push strScanInt         ; ñ÷èòûâàíèå äëèíû ìàññèâà À
         call [scanf]
         add esp, 8
 
         mov eax, [vec_size]
-        cmp eax,[max_vec_size]
+        cmp eax,[max_vec_size]  ; ïðîâåðêà, ÷òî ââåäåííàÿ äëèíà áîëüøå 0 è ìåíüøå èëè ðàâíà 100
         jg failSize
         cmp eax, 0
         jg  getVector
 ; fail size
-failSize:
+failSize:                       ; Âûâîä ñîîáùåíèÿ î íåêîððåêòíîé äëèíå
         push [vec_size]
         push strIncorSize
         call [printf]
         jmp finish
 ; else continue...
-getVector:
+getVector:                      ; Ââîä ýëåìåíòîâ ìàññèâà
         xor ecx, ecx            ; ecx = 0
         mov ebx, vec            ; ebx = &vec
 getVecLoop:
         mov [tmp], ebx
         cmp ecx, [vec_size]
-        jge endInputVector       ; to end of loop
+        jge endInputVector      ; to end of loop
 
-        ; input element
         mov [i], ecx
         push ecx
-        push strVecElemI
+        push strVecElemI        ; Îòîáðàæåíèå ñîîáùåíèÿ
         call [printf]
         add esp, 8
 
         push ebx
-        push strScanInt
+        push strScanInt         ; Ñ÷èòûâàíèå ââåäåííîãî ýëåìåíòà
         call [scanf]
         add esp, 8
 
@@ -93,67 +94,69 @@ getVecLoop:
         jmp getVecLoop
 endInputVector:
         ret
-;--------------------------------------------------------------------------
+;------------------------------ Ïîèñê ìèíèìàëüíîãî ýëåìåíòà------------------
 VectorMin:
 
         xor ecx, ecx            ; ecx = 0
         mov ebx, vec            ; ebx = &vec
         mov ebp, vec            ; min
 minVecLoop:
-        ;mov [tmp], ebx
         cmp ecx, [vec_size]
         je endMinVector      ; to end of loop
+
         cmp ebp,[ebx]
-        jle nextMinVecLoop  ; element not min skippimg
-        mov ebp,[ebx]      ; save new min element
+        jle nextMinVecLoop      ; Åñëè ýëåìåíò íå ìåíüøå ìèíèìóìà òî ïåðåõîäèì
+        mov ebp,[ebx]           ; ñîõðàíåíèå íîâîãî ìèíèìàëüíîãî ýëåìåíòà
         mov [min], ebp
+
 nextMinVecLoop:
         inc ecx
         add ebx, 4
         jmp minVecLoop
 endMinVector:
         ret
-;--------------------------------------------------------------------------
+;------------------------------Ñîçäàíèå íîâîãî ìàññèâ-----------------------
 VectorBGenerator:
         mov [tmpStack], esp
         xor ecx, ecx            ; ecx = 0
-        mov ebx, vec
-        mov edx,new_vec; ebx = &vec
+        mov ebx, vec            ; ebx = &vec
+        mov edx,new_vec         ; edx = &new_vec
 newVecLoop:
         cmp ecx, [vec_size]
         je endNewSumVector      ; to end of loop
         mov eax,[min]
         cmp eax,[ebx]
-        je nextNewVecLoop  ; skipping elemets equal to min
+        je nextNewVecLoop       ; Ïðîïóñê ýëåìåíòîâ ðàâíûõ ìèíèìàëüíîìó
+
         inc [new_vec_size]
-        mov ebp, [ebx]
+        mov ebp, [ebx]          ; Äîáàâëåíèå ýëåìåíòà â íîâûé ìàññèâ
         mov [edx], ebp
         add edx,4
+
 nextNewVecLoop:
         inc ecx
-        ;mov ebx, [tmp]
         add ebx, 4
         jmp newVecLoop
 endNewSumVector:
         mov esp, [tmpStack]
         ret
-;--------------------------------------------------------------------------
+;------------------------------Âûâîä íîâîãî ìàññèâà---------------------------
 VectorOut:
         mov [tmpStack], esp
         xor ecx, ecx            ; ecx = 0
         mov ebx, new_vec        ; ebx = &new_vec
 
-        cmp [new_vec_size],0
-        je zeroElements
+        cmp [new_vec_size],0    ; Ïðîâåðêà äëèíû íîâîãî ìàññèâà
+        je zeroElements         ; Åñëè äëèíà ðàâíà 0 çíà÷èò â ìàññèâå íåò ýëåìåíòîâ è îòîáðàæàåòñÿ ñîîòâåòñòâóþùåå ñîîáùåíèå
 putVecLoop:
         mov [tmp], ebx
         cmp ecx, [new_vec_size]
         je endOutputVector      ; to end of loop
         mov [i], ecx
 
-        ; output element
+
         push dword [ebx]
-        push ecx
+        push ecx                ; output element
         push strVecElemOut
         call [printf]
 
@@ -162,7 +165,7 @@ putVecLoop:
         mov ebx, [tmp]
         add ebx, 4
         jmp putVecLoop
-zeroElements:
+zeroElements:                   ; Îòîáðàæåíèå ñîîáùåíèÿ î ïóñòîì ìàññèâå Â
         push strZeroNewVector
         call [printf]
 endOutputVector:
