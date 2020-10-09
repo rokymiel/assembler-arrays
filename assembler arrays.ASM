@@ -61,11 +61,10 @@ VectorInput:
         jg  getVector
 ; fail size
 failSize:
-        push vec_size
+        push [vec_size]
         push strIncorSize
         call [printf]
-        push 0
-        call [ExitProcess]
+        jmp finish
 ; else continue...
 getVector:
         xor ecx, ecx            ; ecx = 0
