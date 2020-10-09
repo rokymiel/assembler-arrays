@@ -170,7 +170,7 @@ endOutputVector:
         mov esp, [tmpStack]
         ret
 
-;-------------------------------third act - including HeapApi--------------------------
+;--------------------------------------------------------------------------
                                                  
 section '.idata' import data readable
     library kernel, 'kernel32.dll',\
